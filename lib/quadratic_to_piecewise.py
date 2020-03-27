@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
 import numpy as np
+import copy
 def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,show_result=False):
     '''
     Convert quadratic into piecewise (linear function) of:
     
-    y = m*x + c, where:
-        c1=y0-m1*x0
-        c2=y0-m2*x0
+    y = m*x_delta + y_ref, where:
+        x_delta=x-x_ref
+        x_ref,y_ref is point of piecewise
         ...
 
     Example:
@@ -20,25 +21,55 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,show_
     print(w)
     '''
 
-    def func_2piecewise(x, x0, y0, m1, m2):
-        y = np.piecewise(x, [x < x0, x >= x0],
-                        [lambda x:m1*(x-x0) + y0, lambda x:m2*(x-x0) + y0])
+    def func_2piecewise(x, m_0, x_1, y_1, m_1):
+        y = np.piecewise(x, [x <= x_1, x > x_1],
+                        [lambda x:m_0*(x-x_1) + y_1, lambda x:m_1*(x-x_1) + y_1])
         return y
 
-    # def func_3piecewise(x, x0, y0, m1, m2):
+    # def func_2piecewise(x, x_0, y_0, m_0, x_1, m_1, x_end, y_end):
+    #     y = np.piecewise(x, [x < x_0, (x >= x_0) & (x <= x_1), (x > x_1) & (x <= x_end), x > x_end],
+    #                     [lambda x: y_0, lambda x:m_0*(x-x_0) + y_0, lambda x:m_1*(x-x_end) + y_end, lambda x: y_end])
+    #     return y
+
+    # def func_3piecewise(x, x0, y0, m_0, m2):
     #     y = np.piecewise(x, [x < x0, x >= x0],
-    #                     [lambda x:m1*(x-x0) + y0, lambda x:m2*(x-x0) + y0])
+    #                     [lambda x:m_0*(x-x0) + y0, lambda x:m2*(x-x0) + y0])
     #     return y
 
     def func_quadratic(x,a,a0,a00):
         y=a*x*x+a0*x+a00
         return y    
 
+    def func_linear(x_delta,y_ref,m):
+        y=y_ref+m*x_delta
+        return y
+
+    def func_piecewise(x_list,result):
+        idx=0
+        x_piece=[]
+        y_piece=[]
+        m_piece=[]
+        while idx < piece_number*3:
+            x_piece.append(result[idx])
+            y_piece.append(result[idx+1])
+            m_piece.append(result[idx+2])
+            idx=idx+3
+        piece=0
+        y_list=[]
+        for x in x_list:
+            for piece in range(piece_number):
+                if piece == piece_number-1:
+                    y_list.append(func_linear(x-x_piece[piece],y_piece[piece],m_piece[piece]))
+                elif x <= x_piece[piece+1]:
+                    y_list.append(func_linear(x-x_piece[piece],y_piece[piece],m_piece[piece]))
+                    break
+        return y_list
+
     def func_show_result(a,a0,a00,xmin,xmax,w,marker_number=20):
         # Get points
         x_sample_show=np.linspace(xmin,xmax,marker_number)
         y_real_show = func_quadratic (x_sample_show,a,a0,a00)
-        y_model_show = func_2piecewise(x_sample_show,*w)
+        y_model_show = func_piecewise (x_sample_show,result)
 
         # Plot
         plt.plot(x_sample_show,y_real_show,c='#1f77b4',marker='+',label="Data")
@@ -48,29 +79,49 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,show_
         plt.show()
         pass
 
-    ## main()
+    ## Get sample
     numberOfStep=1+(xmax-xmin)/steps_ize
-
     x_sample=np.linspace(xmin,xmax,numberOfStep)
     y_sample=[a*x*x+a0*x+a00 for x in x_sample]
 
+    ## Solve
     if piece_number==2:
-        w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=([xmin,-np.inf,-np.inf,-np.inf],[xmax,np.inf,np.inf,np.inf]))
-    elif piece_number==3:
-        # w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=([xmin,-np.inf,-np.inf,-np.inf],[xmax,np.inf,np.inf,np.inf]))
-        print('Number of piece is unsupported')
+        # lower_bounds=[-np.inf,xmax,-np.inf,-np.inf,xmin,-np.inf,-np.inf]
+        # upper_bounds=[xmin,np.inf,np.inf,np.inf,xmax,np.inf,np.inf]
+        # w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds))
+        # [x_0, y_0, m_0, x_1, m_1, _, _]= w
+        # y_1=func_2piecewise(x_1, *w)
+        # y_1=y_1.tolist()
+        # result=[x_0,y_0,m_0,x_1,y_1,m_1]
+
+        lower_bounds=[-np.inf,xmin,-np.inf,-np.inf]
+        upper_bounds=[np.inf,xmax,np.inf,np.inf]
+        w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds))
+        x_0=copy.deepcopy(xmin)
+        y_0=func_2piecewise(x_0, *w)
+        [m_0, x_1, y_1, m_1]=w
+        result=[x_0,y_0,m_0,x_1,y_1,m_1]
+
+        print(w)
+
+    # elif piece_number==3:
+    #     # w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=([xmin,-np.inf,-np.inf,-np.inf],[xmax,np.inf,np.inf,np.inf]))
+
     else:
         print('Number of piece is unsupported')
-
+        return []
+    
+    ## Show result
     if show_result==True:
         func_show_result(a,a0,a00,xmin,xmax,w)
     
-    return w
+    return result
 
-xmin=0
-xmax=100
-a=0.1
-a0=1
-a00=10
-w=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
-print(w)
+## Uncomment for example
+# xmin=0
+# xmax=100
+# a=0.1
+# a0=1
+# a00=10
+# result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
+# print(result)
