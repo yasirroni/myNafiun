@@ -27,7 +27,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
 
     def func_3piecewise(x, m_0, x_1, y_1, x_2, y_2, m_2):
         y = np.piecewise(x, [x <= x_1, (x > x_1) & (x <= x_2), x > x_2],
-                        [lambda x:m_0*(x-x_1) + y_1, lambda x:y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x:m_2*(x-x_2) + y_2] )
+                        [lambda x:m_0*(x-x_1) + y_1, lambda x:y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x:m_2*(x-x_2) + y_2])
         return y
 
     def func_quadratic(x,a,a0,a00):
