@@ -35,14 +35,14 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         return y    
 
     def func_gradients(x_list,y_list):
-        len_x_list=len(x_list)
-        if len_x_list==1:
+        if isinstance(x_list, list): 
+            m_list=[]
+            for idx in range(len(x_list)-1):
+                m_list.append((y_list[idx+1]-y_list[idx])/(x_list[idx+1]-x_list[idx]))
+            return m_list 
+        else:
             m_list=y_list/x_list
             return m_list
-        m_list=[]
-        for idx in range(len_x_list-1):
-            m_list.append((y_list[idx+1]-y_list[idx])/(x_list[idx+1]-x_list[idx]))
-        return m_list
 
     def func_linear(x_delta,y_ref,m):
         y=y_ref+m*x_delta
@@ -105,17 +105,14 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         result=[x_0,y_0,m_0,x_1,y_1,m_1]
 
     elif piece_number==3:
-        # lower_bounds=[-np.inf,xmin,-np.inf,xmin,-np.inf]
-        # upper_bounds=[np.inf,xmax,np.inf,xmax,np.inf]
-
-        # w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
-        # x_0=copy.deepcopy(xmin)
-        # y_0=func_3piecewise(x_0, *w).tolist()
-        # [m_0, x_1, y_1, x_2, y_2, m_2]=w
-        # m_1=func_gradients(x_2-x_1,y_2-y_1)
-        # result=[x_0,y_0,m_0,x_1,y_1,m_1, x_2, y_2, m_2]
-        print('Number of piece is unsupported')
-        return []
+        lower_bounds=[-np.inf,xmin,-np.inf,xmin,-np.inf,-np.inf]
+        upper_bounds=[np.inf,xmax,np.inf,xmax,np.inf,np.inf]
+        w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
+        x_0=copy.deepcopy(xmin)
+        y_0=func_3piecewise(x_0, *w).tolist()
+        [m_0, x_1, y_1, x_2, y_2, m_2]=w
+        m_1=func_gradients(x_2-x_1,y_2-y_1)
+        result=[x_0,y_0,m_0,x_1,y_1,m_1, x_2, y_2, m_2]
     else:
         print('Number of piece is unsupported')
         return []
@@ -127,12 +124,12 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     return result
 
 ## Uncomment for example
-# xmin=0
-# xmax=100
-# a=0.1
-# a0=1
-# a00=10
-# result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True)
+xmin=0
+xmax=100
+a=0.1
+a0=1
+a00=10
+result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True)
 # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,mode_hanging=True,show_result=True)
 # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
 # print(result)
