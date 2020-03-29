@@ -123,13 +123,16 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     
     return result
 
-## Uncomment for example
-xmin=0
-xmax=100
-a=0.1
-a0=1
-a00=10
-result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True)
-# result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,mode_hanging=True,show_result=True)
-# result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
-# print(result)
+## Example
+if __name__ == "__main__":
+    xmin=0
+    xmax=100
+    a=0.1
+    a0=1
+    a00=10
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True)
+    # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,mode_hanging=True,show_result=True)
+    # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
+    print(result)
+    pass
+
