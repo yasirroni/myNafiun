@@ -13,12 +13,11 @@ result=test_yield(inp)
 print(result)
 print(result)
 
-print('before open')
-opener(result)
-print('after open')
-opener(result)
-for i in result:
-    print(i)
-print(result)
-# for i in result:
-#     print(i)
+if __name__=="__main__":
+    print('before open')
+    opener(result)
+    print('after open')
+    opener(result)
+    for i in result:
+        print(i)
+    print(result)
