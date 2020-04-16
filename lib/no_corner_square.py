@@ -8,4 +8,5 @@ def no_corner_square(number_of_x):
         print('Please insert a valid number')
 
 if __name__=='__main__':
-    no_corner_square(5)
+    number_of_x=5
+    no_corner_square(number_of_x)
