@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import scipy.optimize as opt
 import numpy as np
 import copy
-def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_hanging=False,hanging_sigma=0.01,show_result=False):
+def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_hanging=False,hanging_sigma=0.01,show_result=False,result_type='complete'):
     '''
     Convert quadratic into piecewise (linear function) of:
         y = m*x_delta + y_ref, where:
@@ -18,6 +18,13 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     a00=10
     w=quadratic_to_piecewise(a,a0,a00,xmin,xmax)   
     print(w)
+
+    result_type (default is complete):
+        (1) 'complete' = points in x,y,m coordinates including both end
+        (2) 'gradients' = points in x,m coordinates including both end 
+        (3) 'points' = points in x,y coordinates including both end
+        (4) 'weights' = result in m_start,(points),m_end format excluding both end points 
+        Last m will be equal to the previous points m value.
     '''
 
     def func_2piecewise(x, m_0, x_1, y_1, m_1):
@@ -40,7 +47,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
             for idx in range(len(x_list)-1):
                 m_list.append((y_list[idx+1]-y_list[idx])/(x_list[idx+1]-x_list[idx]))
             return m_list 
-        else:
+        else: #x_list == delta_x and y_list == delta_y
             m_list=y_list/x_list
             return m_list
 
@@ -48,32 +55,23 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         y=y_ref+m*x_delta
         return y
 
-    def func_piecewise(x_list,result):
-        idx=0
-        x_piece=[]
-        y_piece=[]
-        m_piece=[]
-        while idx < piece_number*3:
-            x_piece.append(result[idx])
-            y_piece.append(result[idx+1])
-            m_piece.append(result[idx+2])
-            idx=idx+3
-        piece=0
+    def func_piecewise(x_sample,x_piece,y_piece,m_piece):
+        midle_points_number=piece_number-1
         y_list=[]
-        for x in x_list:
+        for x in x_sample:
             for piece in range(piece_number):
-                if piece == piece_number-1:
+                if piece == midle_points_number:
                     y_list.append(func_linear(x-x_piece[piece],y_piece[piece],m_piece[piece]))
                 elif x <= x_piece[piece+1]:
                     y_list.append(func_linear(x-x_piece[piece],y_piece[piece],m_piece[piece]))
                     break
         return y_list
 
-    def func_show_result(a,a0,a00,xmin,xmax,w,marker_number=20):
+    def func_show_result(x_list,a,a0,a00,x_piece,y_piece,m_piece,marker_number=20):
         # Get points
-        x_sample_show=np.linspace(xmin,xmax,marker_number)
+        x_sample_show=np.linspace(x_piece[0],x_piece[-1],marker_number)
         y_real_show = func_quadratic (x_sample_show,a,a0,a00)
-        y_model_show = func_piecewise (x_sample_show,result)
+        y_model_show = func_piecewise(x_sample_show,x_piece,y_piece,m_piece)
 
         # Plot
         plt.plot(x_sample_show,y_real_show,c='#1f77b4',marker='+',label="Data")
@@ -85,6 +83,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
 
     ## Get sample
     numberOfStep=int(1+(xmax-xmin)/steps_ize)
+    midle_points_number=piece_number-1
     x_sample=np.linspace(xmin,xmax,numberOfStep)
     y_sample=[a*x*x+a0*x+a00 for x in x_sample]
 
@@ -94,32 +93,56 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         sigma[[0,-1]]=hanging_sigma
 
     ## Solve
+    x_0 = copy.deepcopy(xmin)
+    x_end = copy.deepcopy(xmax)
     if piece_number==2:
         lower_bounds=[-np.inf,xmin,-np.inf,-np.inf]
         upper_bounds=[np.inf,xmax,np.inf,np.inf]
-
         w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
-        x_0=copy.deepcopy(xmin)
-        y_0=func_2piecewise(x_0, *w).tolist()
-        [m_0, x_1, y_1, m_1]=w
-        result=[x_0,y_0,m_0,x_1,y_1,m_1]
-
+        w = w.tolist()
+        y_0 = func_2piecewise(x_0, *w).tolist()
+        y_end = func_2piecewise(x_end, *w).tolist()
     elif piece_number==3:
         lower_bounds=[-np.inf,xmin,-np.inf,xmin,-np.inf,-np.inf]
         upper_bounds=[np.inf,xmax,np.inf,xmax,np.inf,np.inf]
         w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
-        x_0=copy.deepcopy(xmin)
-        y_0=func_3piecewise(x_0, *w).tolist()
-        [m_0, x_1, y_1, x_2, y_2, m_2]=w
-        m_1=func_gradients(x_2-x_1,y_2-y_1)
-        result=[x_0,y_0,m_0,x_1,y_1,m_1, x_2, y_2, m_2]
+        w = w.tolist()
+        y_0 = func_3piecewise(x_0, *w).tolist()
+        y_end = func_3piecewise(x_end, *w).tolist()
     else:
         print('Number of piece is unsupported')
         return []
     
+    x_piece=[x_0]
+    y_piece=[y_0]
+    m_piece=[w[0]]
+    for idx in range(midle_points_number):
+        x_piece.append(w[1+idx*2])
+        y_piece.append(w[2+idx*2])
+        if idx < midle_points_number-1:
+            m_val=func_gradients(w[1+(idx+1)*2]-w[1+idx*2],w[2+(idx+1)*2]-w[2+idx*2])
+            m_piece.append(m_val)
+    x_piece.append(x_end)
+    y_piece.append(y_end)
+    m_piece.extend([w[-1],w[-1]])
+
+    ## Result Type
+    result=[]
+    if result_type == 'complete':
+        for x_val,y_val,m_val in zip(x_piece,y_piece,m_piece):
+            result.append([x_val,y_val,m_val])
+    elif result_type == 'gradients':
+        for x_val,m_val in zip(x_piece,m_piece):
+            result.append([x_val,m_val])
+    elif result_type == 'points':
+        for x_val,y_val in zip(x_piece,y_piece):
+            result.append([x_val,y_val])
+    elif result_type == 'weights':
+        result=w
+
     ## Show result
     if show_result==True:
-        func_show_result(a,a0,a00,xmin,xmax,w)
+        func_show_result(x_sample,a,a0,a00,x_piece,y_piece,m_piece,marker_number=20)
     
     return result
 
@@ -130,9 +153,13 @@ if __name__ == "__main__":
     a=0.1
     a0=1
     a00=10
-    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True)
-    # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,mode_hanging=True,show_result=True)
-    # result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.01,show_result=True)   
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='complete')
+    print(result)
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='gradients')   
+    print(result)
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='points')   
+    print(result)
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True,result_type='weights')
     print(result)
     pass
 
