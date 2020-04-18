@@ -29,12 +29,22 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
 
     def func_2piecewise(x, m_0, x_1, y_1, m_1):
         y = np.piecewise(x, [x <= x_1, x > x_1],
-                        [lambda x:m_0*(x-x_1) + y_1, lambda x:m_1*(x-x_1) + y_1])
+                        [lambda x: m_0*(x-x_1) + y_1, lambda x: m_1*(x-x_1) + y_1])
         return y
 
     def func_3piecewise(x, m_0, x_1, y_1, x_2, y_2, m_2):
         y = np.piecewise(x, [x <= x_1, (x > x_1) & (x <= x_2), x > x_2],
-                        [lambda x:m_0*(x-x_1) + y_1, lambda x:y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x:m_2*(x-x_2) + y_2])
+                        [lambda x: m_0*(x-x_1) + y_1, lambda x: y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x: m_2*(x-x_2) + y_2])
+        return y
+
+    def func_4piecewise(x, m_0, x_1, y_1, x_2, y_2, x_3, y_3, m_3):
+        y = np.piecewise(x, [x <= x_1, (x > x_1) & (x <= x_2), (x > x_2) & (x <= x_3), x > x_3],
+                        [lambda x: m_0*(x-x_1) + y_1, lambda x: y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x: y_2+(y_3-y_2)*(x-x_2)/(x_3-x_2), lambda x: m_3*(x-x_3) + y_3])
+        return y
+
+    def func_5piecewise(x, m_0, x_1, y_1, x_2, y_2, x_3, y_3, x_4, y_4, m_4):
+        y = np.piecewise(x, [x <= x_1, (x > x_1) & (x <= x_2), (x > x_2) & (x <= x_3), (x > x_3) & (x <= x_4), x > x_4],
+                        [lambda x: m_0*(x-x_1) + y_1, lambda x: y_1+(y_2-y_1)*(x-x_1)/(x_2-x_1), lambda x: y_2+(y_3-y_2)*(x-x_2)/(x_3-x_2), lambda x: y_3+(y_4-y_3)*(x-x_3)/(x_4-x_3), lambda x: m_4*(x-x_4) + y_4])
         return y
 
     def func_quadratic(x,a,a0,a00):
@@ -45,10 +55,16 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         if isinstance(x_list, list): 
             m_list=[]
             for idx in range(len(x_list)-1):
-                m_list.append((y_list[idx+1]-y_list[idx])/(x_list[idx+1]-x_list[idx]))
+                if (x_list[idx+1]-x_list[idx]) == 0:
+                    m_list.append([0])
+                else:
+                    m_list.append((y_list[idx+1]-y_list[idx])/(x_list[idx+1]-x_list[idx]))
             return m_list 
         else: #x_list == delta_x and y_list == delta_y
-            m_list=y_list/x_list
+            if x_list == 0:
+                m_list = 0
+            else:
+                m_list=y_list/x_list
             return m_list
 
     def func_linear(x_delta,y_ref,m):
@@ -92,23 +108,43 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     if mode_hanging==True:
         sigma[[0,-1]]=hanging_sigma
 
-    ## Solve
+    ## Start and End Points
     x_0 = copy.deepcopy(xmin)
     x_end = copy.deepcopy(xmax)
+
+    ## Bounds and Initial Guesses
+    lower_bounds=[-np.inf]
+    upper_bounds=[np.inf]
+    p0=[0]
+    for idx in range(midle_points_number):
+        lower_bounds.extend([xmin,-np.inf])
+        upper_bounds.extend([xmax,np.inf])
+        p0.extend([x_0+(idx+1)*(x_end-x_0)/piece_number,0])
+    lower_bounds.extend([-np.inf])
+    upper_bounds.extend([np.inf])
+    p0.extend([0])
+
+    ## Solve
     if piece_number==2:
-        lower_bounds=[-np.inf,xmin,-np.inf,-np.inf]
-        upper_bounds=[np.inf,xmax,np.inf,np.inf]
-        w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
+        w, _ = opt.curve_fit(func_2piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma,p0=p0)
         w = w.tolist()
         y_0 = func_2piecewise(x_0, *w).tolist()
         y_end = func_2piecewise(x_end, *w).tolist()
     elif piece_number==3:
-        lower_bounds=[-np.inf,xmin,-np.inf,xmin,-np.inf,-np.inf]
-        upper_bounds=[np.inf,xmax,np.inf,xmax,np.inf,np.inf]
-        w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma)
+        w, _ = opt.curve_fit(func_3piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma,p0=p0)
         w = w.tolist()
         y_0 = func_3piecewise(x_0, *w).tolist()
         y_end = func_3piecewise(x_end, *w).tolist()
+    elif piece_number==4:
+        w, _ = opt.curve_fit(func_4piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma,p0=p0)
+        w = w.tolist()
+        y_0 = func_4piecewise(x_0, *w).tolist()
+        y_end = func_4piecewise(x_end, *w).tolist()
+    elif piece_number==5:
+        w, _ = opt.curve_fit(func_5piecewise, x_sample, y_sample,bounds=(lower_bounds,upper_bounds),sigma=sigma,p0=p0)
+        w = w.tolist()
+        y_0 = func_5piecewise(x_0, *w).tolist()
+        y_end = func_5piecewise(x_end, *w).tolist()
     else:
         print('Number of piece is unsupported')
         return []
@@ -142,7 +178,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
 
     ## Show result
     if show_result==True:
-        func_show_result(x_sample,a,a0,a00,x_piece,y_piece,m_piece,marker_number=20)
+        func_show_result(x_sample,a,a0,a00,x_piece,y_piece,m_piece,marker_number=50)
     
     return result
 
@@ -153,13 +189,13 @@ if __name__ == "__main__":
     a=0.1
     a0=1
     a00=10
-    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='complete')
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=5,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='complete')
     print(result)
-    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='gradients')   
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=5,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='gradients')   
     print(result)
-    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='points')   
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=5,steps_ize=0.01,mode_hanging=True,show_result=False,result_type='points')   
     print(result)
-    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=3,steps_ize=0.01,mode_hanging=True,show_result=True,result_type='weights')
+    result=quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=5,steps_ize=0.01,mode_hanging=True,show_result=True,result_type='weights')
     print(result)
     pass
 
