@@ -119,7 +119,9 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     for idx in range(midle_points_number):
         lower_bounds.extend([xmin,-np.inf])
         upper_bounds.extend([xmax,np.inf])
-        p0.extend([x_0+(idx+1)*(x_end-x_0)/piece_number,0])
+        x_val=x_0+(idx+1)*(x_end-x_0)/piece_number
+        y_val=a*x_val*x_val+a0*x_val+a00
+        p0.extend([x_val,y_val])
     lower_bounds.extend([-np.inf])
     upper_bounds.extend([np.inf])
     p0.extend([0])
