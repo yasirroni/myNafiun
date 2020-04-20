@@ -115,7 +115,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
     ## Bounds and Initial Guesses
     lower_bounds=[-np.inf]
     upper_bounds=[np.inf]
-    p0=[0]
+    p0=[(y_sample[1]-y_sample[0])/(x_sample[1]-x_sample[0])]
     for idx in range(midle_points_number):
         lower_bounds.extend([xmin,-np.inf])
         upper_bounds.extend([xmax,np.inf])
@@ -124,7 +124,7 @@ def quadratic_to_piecewise(a,a0,a00,xmin,xmax,piece_number=2,steps_ize=0.1,mode_
         p0.extend([x_val,y_val])
     lower_bounds.extend([-np.inf])
     upper_bounds.extend([np.inf])
-    p0.extend([0])
+    p0.extend([(y_sample[-1]-y_sample[-2])/(x_sample[-1]-x_sample[-2])])
 
     ## Solve
     if piece_number==2:
