@@ -2,12 +2,8 @@ import numpy as np
 import string
 import pandas as pd
 def text_mining(path,remove_punctuation=False,lower_case=False):
-	'''Bug
-		There is bug if '‘' is used in the raw data of text. 
-		Sadly, this symbols is pretty common in text title.
-	'''
 	def _remove_punctuation(input_string):
-		input_string=input_string.translate(str.maketrans('', '', string.punctuation + "‘’"))
+		input_string=input_string.translate(str.maketrans('', '', string.punctuation + "‘’" + 'â€˜' + 'â€™'))
 		return(input_string)
 
 	def _lower_case(input_string):
