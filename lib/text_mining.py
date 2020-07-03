@@ -7,7 +7,7 @@ def text_mining(path,remove_punctuation=False,lower_case=False):
 		Sadly, this symbols is pretty common in text title.
 	'''
 	def _remove_punctuation(input_string):
-		input_string=input_string.translate(str.maketrans('', '', string.punctuation))
+		input_string=input_string.translate(str.maketrans('', '', string.punctuation + "‘’"))
 		return(input_string)
 
 	def _lower_case(input_string):
