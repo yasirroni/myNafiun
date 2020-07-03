@@ -47,40 +47,38 @@ def text_mining(path,white_list=None,black_list=None,remove_punctuation=False,lo
 					line=_lower_case(line)
 				text=''
 				for char in line:
-					if char == string.whitespace or ' ':
+					if char == ' ':
 						_dict(text,dict_result)
 						text=''
 					if char in white_list:
-						# print(char)
 						text=text+char
-					# print(text)
-				# exit()
-				# _dict(text,dict_result)				
-			pass
-
+				_dict(text,dict_result)	
+					
+	#cleaning
+	if '' in dict_result: del dict_result['']
 	return dict_result
 	
 if __name__=='__main__':
 	import os
 	path=os.path.join(os.getcwd(),'data\\poems_by_choiril_anwar.txt')
 
-	# black_list='‘’' + '…' +'â€˜' + 'â€™'
-	# save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_normal.csv')
-	# result_raw=text_mining(path,remove_punctuation=True,black_list=black_list)
-	# with open(os.path.join(save_path),'w') as txt_out:
-	# 	for key,value in result_raw.items():
-	# 		txt_out.write(key+','+str(value))
-	# 		txt_out.write('\n')
-	# print(result_raw)
+	black_list='‘’' + '…' +'â€˜' + 'â€™'
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_normal.csv')
+	result_raw=text_mining(path,remove_punctuation=True,black_list=black_list)
+	with open(os.path.join(save_path),'w') as txt_out:
+		for key,value in result_raw.items():
+			txt_out.write(key+','+str(value))
+			txt_out.write('\n')
+	print(result_raw)
 
-	# black_list='‘’' + '…' +'â€˜' + 'â€™'
-	# save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_lower_case.csv')
-	# result_lower_case=text_mining(path,remove_punctuation=True,lower_case=True,black_list=black_list)
-	# with open(os.path.join(save_path),'w') as txt_out:
-	# 	for key,value in result_lower_case.items():
-	# 		txt_out.write(key+','+str(value))
-	# 		txt_out.write('\n')
-	# print(result_lower_case)
+	black_list='‘’' + '…' +'â€˜' + 'â€™'
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_lower_case.csv')
+	result_lower_case=text_mining(path,remove_punctuation=True,lower_case=True,black_list=black_list)
+	with open(os.path.join(save_path),'w') as txt_out:
+		for key,value in result_lower_case.items():
+			txt_out.write(key+','+str(value))
+			txt_out.write('\n')
+	print(result_lower_case)
 
 	white_list=string.ascii_letters+string.digits
 	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_white_list_methode.csv')
