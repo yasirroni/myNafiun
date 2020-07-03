@@ -1,6 +1,6 @@
 import pandas as pd
 
-def csv2dict(path,column_as_key,column_as_value):
+def pd_csv2dict(path,column_as_key,column_as_value):
 	df=pd.read_csv(path,header=None)
 	df=df.set_index([column_as_key])
 	result_dic=df.loc[:,column_as_value].to_dict()
@@ -11,5 +11,5 @@ if __name__=="__main__":
 	path=os.path.join(os.getcwd(),'data\\example_csv.csv')
 	column_as_key=0
 	column_as_value=1
-	dictData=csv2dict(path,column_as_key,column_as_value)
-	print(dictData)
+	dict_data=pd_csv2dict(path,column_as_key,column_as_value)
+	print(dict_data)

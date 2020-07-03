@@ -1,17 +1,17 @@
-import pandas as pd
+def dict2csv(path,dict_data):
+	with open(path,'w') as csv_out:
+		for key,value in dict_data.items():
+			csv_out.write(key+','+str(value))
+			csv_out.write('\n')
 
-def dict2csv(path,dictData):
-	df=pd.DataFrame.from_dict(dictData, orient='index')
-	df.to_csv(path,header=False)
 
-if __name__=="__main__":
-	import os
-	dictData={
+if __name__=='__main__':
+	dict_data={
 		'Key':'Value',
 		'Name':'Test',
 		'Number':25
 	}
-	if not os.path.isdir('data'):
-		os.mkdir('data')
+	
+	import os
 	path=os.path.join(os.getcwd(),'data\\example_csv.csv')
-	dict2csv(path,dictData)
+	dict2csv(path,dict_data)
