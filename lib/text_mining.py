@@ -111,7 +111,7 @@ if __name__=='__main__':
 	print(result_lower_case)
 
 	white_list=string.ascii_letters+string.digits+'_'
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_white_list_methode.csv')
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_white_list_method.csv')
 	result_lower_case=text_mining(path,remove_punctuation=True,lower_case=True,white_list=white_list)
 	with open(os.path.join(save_path),'w') as txt_out:
 		for key,value in result_lower_case.items():
