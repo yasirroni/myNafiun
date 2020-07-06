@@ -89,58 +89,59 @@ if __name__=='__main__':
 	path=os.path.join(os.getcwd(),'data\\poems_by_choiril_anwar.txt')
 
 	black_list='‘’' + '…' +'â€˜' + 'â€™'
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_normal.csv')
-	result_raw=text_mining(path,remove_punctuation=True,black_list=black_list)
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_mining_normal.csv')
+	result=text_mining(path,remove_punctuation=True,black_list=black_list)
 	with open(os.path.join(save_path),'w') as txt_out:
-		for key,value in result_raw.items():
+		for key,value in result.items():
 			if ',' in key:
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	for k, v in result_raw.items():
-		print("{:<10} {:<3}".format(k,v));
-	# print(result_raw)
+	for k, v in result.items():
+		print("{:<15} {:<3}".format(k,v))
 
 	black_list='‘’' + '…' +'â€˜' + 'â€™'
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_lower_case.csv')
-	result_lower_case=text_mining(path,remove_punctuation=True,lower_case=True,black_list=black_list)
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_mining_lower_case.csv')
+	result=text_mining(path,remove_punctuation=True,lower_case=True,black_list=black_list)
 	with open(os.path.join(save_path),'w') as txt_out:
-		for key,value in result_lower_case.items():
+		for key,value in result.items():
 			if ',' in key:
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	print(result_lower_case)
+	for k, v in result.items():
+		print("{:<15} {:<3}".format(k,v))
 
 	white_list=string.ascii_letters+string.digits+'_'
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_white_list_method.csv')
-	result_lower_case=text_mining(path,remove_punctuation=True,lower_case=True,white_list=white_list)
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_mining_white_list_method.csv')
+	result=text_mining(path,remove_punctuation=True,lower_case=True,white_list=white_list)
 	with open(os.path.join(save_path),'w') as txt_out:
-		for key,value in result_lower_case.items():
+		for key,value in result.items():
 			if ',' in key:
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	print(result_lower_case)
+	for k, v in result.items():
+		print("{:<15} {:<3}".format(k,v))
 
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_char_counting.csv')
-	result_lower_case=text_mining(path,char_counting=True)
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_mining_char_counting.csv')
+	result=text_mining(path,char_counting=True)
 	with open(os.path.join(save_path),'w') as txt_out:
-		for key,value in result_lower_case.items():
+		for key,value in result.items():
 			if ',' in key:
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	print(result_lower_case)
+	for k, v in result.items():
+		print("{:<15} {:<3}".format(k,v))
 
-	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_char_counting_lower_case.csv')
-	result_lower_case=text_mining(path,lower_case=True,char_counting=True)
+	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_mining_char_counting_lower_case.csv')
+	result=text_mining(path,lower_case=True,char_counting=True)
 	with open(os.path.join(save_path),'w') as txt_out:
-		for key,value in result_lower_case.items():
+		for key,value in result.items():
 			if ',' in key:
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	for k, v in result_lower_case.items():
-		print("{:<10} {:<3}".format(k,v));
-	# print(result_lower_case)
+	for k, v in result.items():
+		print("{:<15} {:<3}".format(k,v))
