@@ -97,7 +97,9 @@ if __name__=='__main__':
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	print(result_raw)
+	for k, v in result_raw.items():
+		print("{:<10} {:<3}".format(k,v));
+	# print(result_raw)
 
 	black_list='‘’' + '…' +'â€˜' + 'â€™'
 	save_path=os.path.join(os.getcwd(),'data\\[RESULT]_text_minning_lower_case.csv')
@@ -139,4 +141,6 @@ if __name__=='__main__':
 				key='"'+key+'"'
 			txt_out.write(key+','+str(value))
 			txt_out.write('\n')
-	print(result_lower_case)
+	for k, v in result_lower_case.items():
+		print("{:<10} {:<3}".format(k,v));
+	# print(result_lower_case)
