@@ -1,6 +1,10 @@
 def pretty(value, htchar=' ', width=4, lfchar='\n', indent=0):
     '''This is pretty printer function.
     Edited from y.petremann [answer](https://stackoverflow.com/a/26209900).
+    
+    Usage:
+        
+        print(pretty(your_data))
 
     You can add your new data type such as:
 
