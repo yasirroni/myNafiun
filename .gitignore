@@ -1,6 +1,11 @@
 # Acknowledgement
 #  This template is based on: https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore
 
+# local
+playground.py
+on_progress/
+local/
+
 # Debug
 test.py
 test.ipynb
